@@ -17,11 +17,12 @@ const initializeDatabase = async () => {
                 id BIGINT PRIMARY KEY AUTO_INCREMENT,
                 username VARCHAR(255) NOT NULL,
                 country VARCHAR(2) NOT NULL,
-                money DECIMAL(20,2) DEFAULT 0,
-                weekly_money DECIMAL(20,2) DEFAULT 0,
+                money INT(5) DEFAULT 0,
+                player_rank INT DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_weekly_money (weekly_money),
+                INDEX idx_money (money),
+                INDEX idx_player_rank (player_rank),
                 INDEX idx_country (country)
             )
         `);

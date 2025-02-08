@@ -112,6 +112,14 @@ export const RouteConstants = {
         PRIZE_POOL: "/prize-pool"
     },
 
+    /**
+     * Endpoint for seed 10m players
+     * @constant
+     * @type {string}
+     * @default "/seed-players"
+     */
+    SEED_PLAYERS: "/seed-players",
+
     // OPTIONAL
     /**
      * Websocket related endpoints
