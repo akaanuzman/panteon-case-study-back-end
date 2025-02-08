@@ -1,5 +1,6 @@
 import mysql from 'mysql2/promise';
 import { MySQLConfigOptions } from './mysql.config.options';
+import logger from '../helpers/logs/logger';
 
 const configOptions = MySQLConfigOptions.getInstance();
 const pool = mysql.createPool(configOptions.getOptions());
@@ -28,9 +29,9 @@ const initializeDatabase = async () => {
         `);
 
         connection.release();
-        console.log('Database and tables initialized successfully');
+        logger.info('Database and tables initialized successfully');
     } catch (error) {
-        console.error('Database initialization error:', error);
+        logger.error('Database initialization error:', error);
         throw error;
     }
 };

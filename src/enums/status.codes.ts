@@ -8,6 +8,7 @@
  * @property UNAUTHORIZED - 401
  * @property FORBIDDEN - 403
  * @property NOT_FOUND - 404
+ * @property TOO_MANY_REQUESTS - 429
  * @property INTERNAL_SERVER_ERROR - 500
  */
 export enum StatusCodes {
@@ -18,5 +19,6 @@ export enum StatusCodes {
     UNAUTHORIZED = 401,
     FORBIDDEN = 403,
     NOT_FOUND = 404,
+    TOO_MANY_REQUESTS = 429,
     INTERNAL_SERVER_ERROR = 500,
 }

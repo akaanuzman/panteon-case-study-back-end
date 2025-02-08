@@ -1,6 +1,7 @@
 import { Connection } from 'mysql2/promise';
 import { faker } from '@faker-js/faker';
 import { COUNTRY_CODES, TOTAL_COUNTRIES } from '../enums/players.countries';
+import logger from '../helpers/logs/logger';
 
 export class SeederService {
     private static BATCH_SIZE = 10000;
@@ -47,7 +48,7 @@ export class SeederService {
                 // with percentage, total records inserted, and records per second
                 if (insertedCount % 1000000 === 0) {
                     const progress = (insertedCount / this.TOTAL_PLAYERS) * 100;
-                    console.log(`Progress: ${progress.toFixed(2)}% (${insertedCount} records)`);
+                    logger.info(`Progress: ${progress.toFixed(2)}% (${insertedCount} records)`);
                 }
             }
 
@@ -61,7 +62,7 @@ export class SeederService {
                 recordsPerSecond: (insertedCount / duration).toFixed(2)
             };
         } catch (error) {
-            console.error('Seeding error:', error);
+            logger.error('Seeding error:', error);
             throw error;
         }
     }
