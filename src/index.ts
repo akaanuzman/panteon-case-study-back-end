@@ -7,6 +7,7 @@ import router from './router';
 import { notFoundMiddleware } from './middlewares/not.found.middleware';
 import Redis from 'ioredis';
 import initializeDatabase from './config/mysql.config';
+import { rateLimiterMiddleware } from './middlewares/rate.limiter.middleware';
 
 dotenv.config();
 
@@ -18,6 +19,8 @@ const redis = new Redis();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(RouteConstants.ALL_ROUTES, rateLimiterMiddleware);
 
 app.use(RouteConstants.API, router);
 
