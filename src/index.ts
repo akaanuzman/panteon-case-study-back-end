@@ -6,6 +6,7 @@ import { RouteConstants } from './constants/route.constants';
 import router from './router';
 import { notFoundMiddleware } from './middlewares/not.found.middleware';
 import Redis from 'ioredis';
+import initializeDatabase from './config/mysql.config';
 
 dotenv.config();
 
@@ -26,9 +27,12 @@ app.use(RouteConstants.ALL_ROUTES, notFoundMiddleware);
 app.listen(port, async () => {
     try {
         await redis.ping();
-        console.log(`⚡️[redis]: Redis is running`);
-        console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
+        console.info(`⚡️[redis]: Redis is running`);
+        await initializeDatabase();
+        console.info(`⚡️[mysql]: MySQL is running`);
+        console.info(`⚡️[server]: Server is running at http://localhost:${port}`);
     } catch (error) {
-        console.error('Error connecting to Redis');
+        console.error('Error: ', error);
+        process.exit(1);
     }
 });
