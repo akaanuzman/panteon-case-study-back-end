@@ -106,6 +106,52 @@ export class LeaderboardService {
         }
     }
 
+    public static async getPrizePool(redis: Redis) {
+        try {
+            let totalMoney = await redis.get(RedisKeys.TOTAL_MONEY_KEY);
+
+            if (!totalMoney) {
+                totalMoney = '0';
+                let cursor = '0';
+                let runningTotal = BigInt(0);
+                const CHUNK_SIZE = 1000;
+
+                do {
+                    const [nextCursor, chunk] = await redis.zscan(
+                        RedisKeys.LEADERBOARD_KEY,
+                        cursor,
+                        'COUNT',
+                        CHUNK_SIZE
+                    );
+
+                    cursor = nextCursor;
+
+                    for (let i = 0; i < chunk.length; i += 2) {
+                        const playerData = JSON.parse(chunk[i]);
+                        runningTotal += BigInt(playerData.money);
+                    }
+                } while (cursor !== '0');
+
+                totalMoney = runningTotal.toString();
+                await redis.set(RedisKeys.TOTAL_MONEY_KEY, totalMoney, 'EX', 3600);
+            }
+
+            const totalMoneyBigInt = BigInt(totalMoney);
+            const prizePool = totalMoneyBigInt * BigInt(2) / BigInt(100);
+
+            return {
+                totalMoney: totalMoney,
+                prizePool: prizePool.toString(),
+                prizePoolPercentage: 2,
+                cachedAt: await redis.ttl(RedisKeys.TOTAL_MONEY_KEY)
+            };
+        } catch (error) {
+            logger.error('Redis Error:', error);
+            throw error;
+        }
+    }
+
+
     private static formatLeaderboard(data: string[]) {
         try {
             const formatted = [];

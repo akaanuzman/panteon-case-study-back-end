@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { LeaderboardService } from "../services/leaderboard.service";
 import { RedisConfig } from '../config/redis.config';
 import { StatusCodes } from '../enums/status.codes';
+import logger from '../helpers/logs/logger';
 
 /**
  * LeaderboardController
@@ -12,6 +13,7 @@ import { StatusCodes } from '../enums/status.codes';
  * @methods
  * - getTopPlayers: GET /api/leaderboard/top - Returns top 100 players
  * - searchPlayerRanking: GET /api/leaderboard/search?username - Finds player's rank and surrounding players
+ * - getPrizePool: GET /api/leaderboard/prize-pool - Calculates prize pool
  * 
  * @throws {400} For invalid requests
  * @throws {404} When data not found
@@ -33,7 +35,7 @@ export class LeaderboardController {
 
             return res.json(topPlayers);
         } catch (error: any) {
-            console.error('Leaderboard Error:', error);
+            logger.error('Leaderboard Error:', error);
             return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 error: "Failed to fetch leaderboard",
                 details: error.message
@@ -56,13 +58,31 @@ export class LeaderboardController {
 
             return res.json(rankData);
         } catch (error: any) {
-            console.error('Search Error:', error);
+            logger.error('Search Error:', error);
             return res.status(
                 error.message === 'Player not found' ?
                     StatusCodes.NOT_FOUND :
                     StatusCodes.INTERNAL_SERVER_ERROR
             ).json({
                 error: error.message || "Failed to search player ranking"
+            });
+        }
+    }
+
+    public static async getPrizePool(req: Request, res: Response): Promise<Response> {
+        try {
+            const redis = RedisConfig.getInstance();
+            const prizePoolData = await LeaderboardService.getPrizePool(redis);
+
+            return res.json(prizePoolData);
+        } catch (error: any) {
+            logger.error('Prize Pool Error:', error);
+            return res.status(
+                error.message === 'No leaderboard data found in Redis' ?
+                    StatusCodes.NOT_FOUND :
+                    StatusCodes.INTERNAL_SERVER_ERROR
+            ).json({
+                error: error.message || "Failed to calculate prize pool"
             });
         }
     }

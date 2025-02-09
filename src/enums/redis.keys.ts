@@ -6,7 +6,9 @@
  * 
  * @enum {string}
  * @property LEADERBOARD_KEY - The key for the leaderboard sorted set in Redis.
+ * @property TOTAL_MONEY_KEY - The key for the total money value in Redis.
  */
 export enum RedisKeys {
-    LEADERBOARD_KEY = "leaderboard"
+    LEADERBOARD_KEY = "leaderboard",
+    TOTAL_MONEY_KEY = "total_money"
 }
