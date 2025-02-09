@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
@@ -9,6 +9,7 @@ import initializeDatabase from './config/mysql.config';
 import { rateLimiterMiddleware } from './middlewares/rate.limiter.middleware';
 import { requestLogger } from './middlewares/log.middleware';
 import logger from './helpers/logs/logger';
+import { LeaderboardScheduler } from './scheduler/leaderboard.scheduler';
 
 dotenv.config();
 
@@ -26,6 +27,8 @@ app.use(RouteConstants.API, router);
 
 // 404 Middleware
 app.use(RouteConstants.ALL_ROUTES, notFoundMiddleware);
+
+LeaderboardScheduler.initScheduledJobs();
 
 app.listen(port, async () => {
     try {

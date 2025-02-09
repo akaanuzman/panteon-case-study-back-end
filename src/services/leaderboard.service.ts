@@ -151,6 +151,76 @@ export class LeaderboardService {
         }
     }
 
+    public static async resetWeeklyLeaderboard(redis: Redis) {
+        try {
+            // Get top 100 players before reset
+            const topPlayers = await redis.zrange(
+                RedisKeys.LEADERBOARD_KEY,
+                0,
+                99,
+                'WITHSCORES'
+            );
+
+            if (!topPlayers || topPlayers.length === 0) {
+                throw new Error('No players found in leaderboard');
+            }
+
+            // Get prize pool
+            const prizePoolData = await this.getPrizePool(redis);
+            const prizePool = BigInt(prizePoolData.prizePool);
+
+            // Calculate prize distribution
+            const prizeDistribution = new Map([
+                [0, 20], // 1st place - 20%
+                [1, 15], // 2nd place - 15%
+                [2, 10], // 3rd place - 10%
+            ]);
+
+            // Remaining 55% distributed among positions 4-100
+            const remainingPrize = BigInt(55);
+            const remainingPlayers = BigInt(97); // 100 - 3
+            const baseAmount = Number(remainingPrize) / Number(remainingPlayers);
+
+            // Distribute prizes
+            const rewards = [];
+            for (let i = 0; i < topPlayers.length; i += 2) {
+                const playerData = JSON.parse(topPlayers[i]);
+                const rank = i / 2;
+                let prizePercentage;
+
+                if (prizeDistribution.has(rank)) {
+                    prizePercentage = prizeDistribution.get(rank)!;
+                } else {
+                    prizePercentage = Math.floor(baseAmount);
+                }
+
+                const reward = (prizePool * BigInt(prizePercentage)) / BigInt(100);
+
+                rewards.push({
+                    playerId: playerData.id,
+                    username: playerData.username,
+                    rank: rank + 1,
+                    prize: reward.toString()
+                });
+            }
+
+            // Reset leaderboard scores
+            await redis.del(RedisKeys.LEADERBOARD_KEY);
+            await redis.del(RedisKeys.TOTAL_MONEY_KEY);
+
+            logger.info('Weekly leaderboard reset successful');
+
+            return {
+                message: 'Weekly leaderboard reset successful',
+                totalPrizePool: prizePool.toString(),
+                rewards
+            };
+        } catch (error) {
+            logger.error('Leaderboard Reset Error:', error);
+            throw error;
+        }
+    }
+
 
     private static formatLeaderboard(data: string[]) {
         try {

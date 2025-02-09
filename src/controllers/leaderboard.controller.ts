@@ -86,4 +86,19 @@ export class LeaderboardController {
             });
         }
     }
+
+    public static async resetWeeklyLeaderboard(req: Request, res: Response): Promise<Response> {
+        try {
+            const redis = RedisConfig.getInstance();
+            const resetResult = await LeaderboardService.resetWeeklyLeaderboard(redis);
+
+            return res.json(resetResult);
+        } catch (error: any) {
+            logger.error('Leaderboard Reset Error:', error);
+            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                error: "Failed to reset weekly leaderboard",
+                details: error.message
+            });
+        }
+    }
 }
