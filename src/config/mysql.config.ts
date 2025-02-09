@@ -16,10 +16,10 @@ const initializeDatabase = async () => {
         await connection.query(`
             CREATE TABLE IF NOT EXISTS players (
                 id BIGINT PRIMARY KEY AUTO_INCREMENT,
-                username VARCHAR(255) NOT NULL,
+                username VARCHAR(255) NOT NULL UNIQUE,  
                 country VARCHAR(2) NOT NULL,
                 money INT(5) DEFAULT 0,
-                player_rank INT DEFAULT 0,
+                player_rank INT DEFAULT 0 UNIQUE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 INDEX idx_money (money),

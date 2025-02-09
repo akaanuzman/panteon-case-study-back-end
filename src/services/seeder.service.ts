@@ -20,6 +20,25 @@ import { RedisKeys } from '../enums/redis.keys';
 export class SeederService {
     private static BATCH_SIZE = 10000;
     private static TOTAL_PLAYERS = 10000000;
+    private static usernameSet = new Set<string>();
+
+    private static generateUniqueUsername(): string {
+        let username: string;
+        do {
+            const firstName = faker.person.firstName();
+            const gamertag = faker.internet.username();
+            const number = faker.number.int({ min: 1, max: 9999 });
+
+            username = `${firstName}_${gamertag}${number}`
+                .replace(/[^a-zA-Z0-9_]/g, '')
+                .toLowerCase()
+                .substring(0, 30);
+
+        } while (this.usernameSet.has(username));
+
+        this.usernameSet.add(username);
+        return username;
+    }
 
     /**
      * Seeds the database with player data in batches
@@ -44,7 +63,7 @@ export class SeederService {
             for (let i = 0; i < this.TOTAL_PLAYERS; i += this.BATCH_SIZE) {
                 const batchRanks = ranks.slice(i, i + this.BATCH_SIZE);
                 const values = Array.from({ length: this.BATCH_SIZE }, (_, index) => [
-                    faker.internet.username(), // Random username
+                    this.generateUniqueUsername(), // Unique username
                     COUNTRY_CODES[Math.floor(Math.random() * TOTAL_COUNTRIES)], // Random country code
                     faker.finance.amount({ min: 50, max: 10000, dec: 0 }), // Random money amount
                     batchRanks[index] // Assign rank from shuffled ranks array
@@ -65,6 +84,9 @@ export class SeederService {
                     logger.info(`Progress: ${progress.toFixed(2)}% (${insertedCount} records)`);
                 }
             }
+
+            // Clear the Set after seeding is complete to free up memory
+            this.usernameSet.clear();
 
             const endTime = Date.now();
             const duration = (endTime - startTime) / 1000;
