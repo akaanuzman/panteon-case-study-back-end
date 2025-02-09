@@ -30,8 +30,11 @@ router.post(RouteConstants.LEADERBOARD.DISTRIBUTE_REWARDS, (req, res) => {
     res.send('Leaderboard distributing rewards to top players');
 });
 
-router.get(RouteConstants.LEADERBOARD.PRIZE_POOL, (req, res) => {
-    res.send('Leaderboard getting prize pool');
-});
+router.get(
+    RouteConstants.LEADERBOARD.PRIZE_POOL,
+    async (req, res) => {
+        await LeaderboardController.getPrizePool(req, res);
+    }
+);
 
 export default router;
