@@ -5,7 +5,6 @@ import bodyParser from 'body-parser';
 import { RouteConstants } from './constants/route.constants';
 import router from './router';
 import { notFoundMiddleware } from './middlewares/not.found.middleware';
-import Redis from 'ioredis';
 import initializeDatabase from './config/mysql.config';
 import { rateLimiterMiddleware } from './middlewares/rate.limiter.middleware';
 import { requestLogger } from './middlewares/log.middleware';
