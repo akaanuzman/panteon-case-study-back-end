@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { SeederService } from '../services/seeder.service';
 import mysql from 'mysql2/promise';
 import { MySQLConfigOptions } from '../config/mysql.config.options';
+import { StatusCodes } from '../enums/status.codes';
 
 export class SeederController {
     public static async seedPlayers(req: Request, res: Response): Promise<void> {
@@ -11,13 +12,14 @@ export class SeederController {
 
         try {
             const result = await SeederService.seedPlayers(connection);
+            const redisResult = await SeederService.syncLeaderboardWithRedis(connection);
             res.json({
                 status: 'success',
-                message: 'Database seeded successfully',
-                ...result
+                ...result,
+                ...redisResult
             });
         } catch (error: any) {
-            res.status(500).json({
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 status: 'error',
                 message: 'Failed to seed database',
                 error: error.message

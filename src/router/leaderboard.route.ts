@@ -1,12 +1,15 @@
 import express from 'express';
 import { RouteConstants } from '../constants/route.constants';
-
+import { LeaderboardController } from '../controllers/leaderboard.controller';
 
 const router = express.Router();
 
-router.get(RouteConstants.LEADERBOARD.TOP, (req, res) => {
-    res.send('Leaderboard getting top 100 players');
-});
+router.get(
+    RouteConstants.LEADERBOARD.TOP,
+    async (req, res) => {
+        await LeaderboardController.getTopPlayers(req, res);
+    }
+);
 
 router.get(RouteConstants.LEADERBOARD.RANK, (req, res) => {
     res.send(`Leaderboard getting rank for player with id ${req.params.id}`);
