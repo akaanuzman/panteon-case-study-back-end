@@ -1,0 +1,1 @@
+SELECT * FROM leaderboard_db.players ORDER BY player_rank DESC LIMIT 100;

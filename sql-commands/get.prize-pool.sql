@@ -1,0 +1,1 @@
+SELECT (SUM(money) * 0.02) as prize_pool FROM leaderboard_db.players;

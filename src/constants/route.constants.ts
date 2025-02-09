@@ -77,11 +77,11 @@ export const RouteConstants = {
         TOP: "/top",
 
         /**
-         * Endpoint for returns the rank of the specified player and 5 surrounding players.
+         * Endpoint for searching player by username and returning surrounding rankings
          * @type {string}
-         * @default "/rank/:id"
+         * @default "/search"
          */
-        RANK: "/rank/:id",
+        SEARCH: "/search",
 
         /**
          * Endpoint for getting top players group by country

@@ -11,9 +11,12 @@ router.get(
     }
 );
 
-router.get(RouteConstants.LEADERBOARD.RANK, (req, res) => {
-    res.send(`Leaderboard getting rank for player with id ${req.params.id}`);
-});
+router.get(
+    RouteConstants.LEADERBOARD.SEARCH,
+    async (req, res) => {
+        await LeaderboardController.searchPlayerRanking(req, res);
+    }
+);
 
 router.get(RouteConstants.LEADERBOARD.BY_COUNTRY, (req, res) => {
     res.send(`Leaderboard getting top players group by country ${req.query.country}`);
