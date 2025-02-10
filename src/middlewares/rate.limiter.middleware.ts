@@ -9,7 +9,7 @@ const redis = new Redis();
 const rateLimiter = new RateLimiterRedis({
     storeClient: redis,
     keyPrefix: 'middleware',
-    points: 10,
+    points: 50,
     duration: 60,
 });
 

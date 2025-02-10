@@ -221,6 +221,48 @@ export class LeaderboardService {
         }
     }
 
+    public static async getPlayerSuggestions(redis: Redis, query: string) {
+        try {
+            if (!query || query.length < 2) {
+                return [];
+            }
+
+            const MAX_SUGGESTIONS = 4;
+            const suggestions: any[] = [];
+            let cursor = '0';
+
+            do {
+                const [nextCursor, results] = await redis.zscan(
+                    RedisKeys.LEADERBOARD_KEY,
+                    cursor,
+                    'MATCH',
+                    `*"username":"*${query}*"*`,
+                    'COUNT',
+                    100
+                );
+
+                cursor = nextCursor;
+
+                for (let i = 0; i < results.length; i += 2) {
+                    const playerData = JSON.parse(results[i]);
+                    suggestions.push({
+                        username: playerData.username,
+                        country: playerData.country
+                    });
+
+                    if (suggestions.length >= MAX_SUGGESTIONS) {
+                        return suggestions;
+                    }
+                }
+
+            } while (cursor !== '0' && suggestions.length < MAX_SUGGESTIONS);
+
+            return suggestions;
+        } catch (error) {
+            logger.error('Autocomplete Error:', error);
+            throw error;
+        }
+    }
 
     private static formatLeaderboard(data: string[]) {
         try {

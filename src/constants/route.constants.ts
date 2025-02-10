@@ -109,7 +109,14 @@ export const RouteConstants = {
          * @type {string}
          * @default "/prize-pool"
          */
-        PRIZE_POOL: "/prize-pool"
+        PRIZE_POOL: "/prize-pool",
+
+        /**
+         * Endpoint for autocomplete search
+         * @type {string}
+         * @default "/autocomplete"
+         */
+        AUTOCOMPLETE: "/autocomplete"
     },
 
     /**

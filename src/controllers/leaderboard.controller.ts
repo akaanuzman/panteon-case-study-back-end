@@ -101,4 +101,30 @@ export class LeaderboardController {
             });
         }
     }
+
+    public static async getAutocomplete(req: Request, res: Response): Promise<Response> {
+        try {
+            const query = req.query.q as string;
+
+            if (!query) {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    error: "Search query is required"
+                });
+            }
+
+            const redis = RedisConfig.getInstance();
+            const suggestions = await LeaderboardService.getPlayerSuggestions(redis, query);
+
+            return res.json({
+                query,
+                suggestions
+            });
+        } catch (error: any) {
+            logger.error('Autocomplete Error:', error);
+            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                error: "Failed to fetch suggestions",
+                details: error.message
+            });
+        }
+    }
 }
