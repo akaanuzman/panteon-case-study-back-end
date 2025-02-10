@@ -40,4 +40,11 @@ router.get(
     }
 );
 
+router.get(
+    RouteConstants.LEADERBOARD.AUTOCOMPLETE,
+    async (req, res) => {
+        await LeaderboardController.getAutocomplete(req, res);
+    }
+);
+
 export default router;
