@@ -152,6 +152,8 @@ export class LeaderboardService {
     }
 
     public static async resetWeeklyLeaderboard(redis: Redis) {
+        const pipeline = redis.pipeline();
+        
         try {
             // Get top 100 players before reset
             const topPlayers = await redis.zrange(
@@ -183,6 +185,8 @@ export class LeaderboardService {
 
             // Distribute prizes
             const rewards = [];
+            const weekNumber = this.getCurrentWeekNumber();
+            
             for (let i = 0; i < topPlayers.length; i += 2) {
                 const playerData = JSON.parse(topPlayers[i]);
                 const rank = i / 2;
@@ -200,25 +204,64 @@ export class LeaderboardService {
                     playerId: playerData.id,
                     username: playerData.username,
                     rank: rank + 1,
-                    prize: reward.toString()
+                    prize: reward.toString(),
+                    weekNumber
                 });
+
+                // Store prize distribution history in Redis
+                pipeline.hset(
+                    `${RedisKeys.PRIZE_HISTORY_KEY}:${weekNumber}`,
+                    playerData.id,
+                    JSON.stringify({
+                        username: playerData.username,
+                        rank: rank + 1,
+                        prize: reward.toString(),
+                        distributedAt: new Date().toISOString()
+                    })
+                );
             }
 
-            // Reset leaderboard scores
-            await redis.del(RedisKeys.LEADERBOARD_KEY);
-            await redis.del(RedisKeys.TOTAL_MONEY_KEY);
+            // Set expiry for prize history (keep for 1 year)
+            pipeline.expire(`${RedisKeys.PRIZE_HISTORY_KEY}:${weekNumber}`, 31536000);
 
-            logger.info('Weekly leaderboard reset successful');
+            // Reset leaderboard scores
+            pipeline.del(RedisKeys.LEADERBOARD_KEY);
+            pipeline.del(RedisKeys.TOTAL_MONEY_KEY);
+
+            // Execute all commands in a transaction
+            await pipeline.exec();
+
+            logger.info(`Weekly leaderboard reset successful for week ${weekNumber}`, {
+                totalPrizePool: prizePool.toString(),
+                totalRewards: rewards.length,
+                timestamp: new Date().toISOString()
+            });
 
             return {
                 message: 'Weekly leaderboard reset successful',
+                weekNumber,
                 totalPrizePool: prizePool.toString(),
                 rewards
             };
         } catch (error) {
+            // Attempt to rollback if possible
+            try {
+                pipeline.discard();
+            } catch (rollbackError) {
+                logger.error('Rollback failed:', rollbackError);
+            }
+
             logger.error('Leaderboard Reset Error:', error);
             throw error;
         }
+    }
+
+    private static getCurrentWeekNumber(): number {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 1);
+        const diff = now.getTime() - start.getTime();
+        const oneWeek = 1000 * 60 * 60 * 24 * 7;
+        return Math.floor(diff / oneWeek);
     }
 
     public static async getPlayerSuggestions(redis: Redis, query: string) {
