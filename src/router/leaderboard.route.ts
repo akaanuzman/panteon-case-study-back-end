@@ -18,14 +18,6 @@ router.get(
     }
 );
 
-router.get(RouteConstants.LEADERBOARD.BY_COUNTRY, (req, res) => {
-    res.send(`Leaderboard getting top players group by country ${req.query.country}`);
-});
-
-router.post(RouteConstants.LEADERBOARD.RESET, (req, res) => {
-    res.send('Leaderboard resetting weekly');
-});
-
 router.post(
     RouteConstants.LEADERBOARD.RESET,
     async (req, res) => {
